@@ -24,7 +24,10 @@ app.post('/download', async (req, res) => {
             return res.status(400).json({ error: 'Invalid post URL.' });
         }
 
-        browser = await puppeteer.launch({ headless: 'new' });
+        browser = await puppeteer.launch({
+            headless: true,
+            executablePath: '/usr/bin/google-chrome-stable', // Adjust the path based on your Docker setup
+        });
         const page = await browser.newPage();
 
         // Navigate to the Instagram post URL
