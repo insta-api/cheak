@@ -23,9 +23,11 @@ app.post('/download', async (req, res) => {
             return res.status(400).json({ error: 'Invalid post URL.' });
         }
 
-        // Launch Puppeteer with Firefox
+        const executablePath = path.resolve(__dirname, 'chromium-bin', 'chrome.exe');
+        console.log('Executable Path:', executablePath);
+
         const browser = await puppeteer.launch({
-            executablePath: './chromium-bin/chrome.exe', // Adjust the path accordingly
+            executablePath,
             headless: true,
         });
 
