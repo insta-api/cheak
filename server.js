@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const puppeteer = require('puppeteer');
 const bodyParser = require('body-parser');
+const path = require('path');
 
 const app = express();
 const PORT = 8080;
@@ -23,14 +24,7 @@ app.post('/download', async (req, res) => {
             return res.status(400).json({ error: 'Invalid post URL.' });
         }
 
-        const executablePath = path.resolve(__dirname, 'chromium-bin', 'chrome.exe');
-        console.log('Executable Path:', executablePath);
-
-        const browser = await puppeteer.launch({
-            executablePath,
-            headless: true,
-        });
-
+        browser = await puppeteer.launch({ headless: 'new' });
         const page = await browser.newPage();
 
         // Navigate to the Instagram post URL
