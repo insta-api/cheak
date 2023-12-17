@@ -1,0 +1,8 @@
+tasks:
+  - name: "docker-build"
+    command: "docker"
+    args: ["build", "-t", "Docker", "."]
+
+  - name: "docker-run"
+    command: "docker"
+    args: ["run", "-p", "8080:8080", "Docker"]
