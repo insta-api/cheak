@@ -49,36 +49,39 @@ app.get('/get-os-info', (req, res) => {
 });
 
 app.post('/download', async (req, res) => {
-    
+    const postUrl = req.body.postUrl; // Assuming postUrl is coming from the request body
     const ipAddress = req.clientIp;
-    if (!postUrl) {
+
+    try {
+        if (!postUrl) {
             return res.status(400).json({ error: 'Invalid post URL.' });
         }
+
         const browser = await puppeteer.launch({
             args: [
-              "--disable-setuid-sandbox",
-              "--no-sandbox",
-              "--single-process",
-              "--no-zygote",
+                "--disable-setuid-sandbox",
+                "--no-sandbox",
+                "--single-process",
+                "--no-zygote",
             ],
-            executablePath:
-              process.env.NODE_ENV === "production"
+            executablePath: process.env.NODE_ENV === "production"
                 ? process.env.PUPPETEER_EXECUTABLE_PATH
                 : puppeteer.executablePath(),
-          });
+            headless: true, // Set headless to true for production, 'new' is not a valid value
+        });
 
-
-        browser = await puppeteer.launch({ headless: 'new' });
         const page = await browser.newPage();
 
         // Navigate to the Instagram post URL
         await page.goto(postUrl);
         await page.waitForTimeout(5000);
+
         const videoTagContent = await page.evaluate(() => {
             const videoTag = document.querySelector('video');
             const imageTag = document.querySelector('img');
             return videoTag ? videoTag.src : (imageTag ? imageTag.outerHTML : 'No video or image tag found');
         });
+
         // Send the video or image tag content as the response
         res.status(200).json({ content: videoTagContent });
     } catch (error) {
@@ -90,6 +93,7 @@ app.post('/download', async (req, res) => {
         }
     }
 });
+
 app.listen(PORT, () => {
     console.log(`Server is running on ${PORT}`);
 });
