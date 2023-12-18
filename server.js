@@ -19,17 +19,23 @@ app.get('/', (req, res) => {
 
 
 app.get('/get-os-info', (req, res) => {
-    const osInfo = {
-        platform: os.platform(),
-        type: os.type(),
-        release: os.release(),
-        architecture: os.arch(),
-        cpus: os.cpus(),
-        totalMemory: os.totalmem(),
-        freeMemory: os.freemem(),
-    };
+    // Check if the `yum` command is available
+    exec('which yum', (error, stdout, stderr) => {
+        const yumAvailable = !error;
 
-    res.json(osInfo);
+        const osInfo = {
+            platform: os.platform(),
+            type: os.type(),
+            release: os.release(),
+            architecture: os.arch(),
+            cpus: os.cpus(),
+            totalMemory: os.totalmem(),
+            freeMemory: os.freemem(),
+            yumAvailable: yumAvailable,
+        };
+
+        res.json(osInfo);
+    });
 });
 
 
