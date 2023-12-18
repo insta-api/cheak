@@ -51,7 +51,10 @@ app.get('/get-os-info', (req, res) => {
 app.post('/download', async (req, res) => {
     
     const ipAddress = req.clientIp;
-    const browser = await puppeteer.launch({
+    if (!postUrl) {
+            return res.status(400).json({ error: 'Invalid post URL.' });
+        }
+        const browser = await puppeteer.launch({
             args: [
               "--disable-setuid-sandbox",
               "--no-sandbox",
@@ -63,30 +66,7 @@ app.post('/download', async (req, res) => {
                 ? process.env.PUPPETEER_EXECUTABLE_PATH
                 : puppeteer.executablePath(),
           });
-   
-    try {
-        let postUrl = req.body.postUrl;
-        let deviceDetail = req.body.device;
 
-        if (postUrl.includes('/?')) {
-            postUrl = postUrl.split('/?')[0];
-        }
-/*
-        const instaDataInstance = new instaData({
-            ipaddress: ipAddress,
-            url: postUrl,
-            mobilename: deviceDetail.mobilename,
-            userAgent: deviceDetail.userAgent,
-            platform: deviceDetail.platform,
-            language: deviceDetail.language,
-        });
-
-        // Save the instance to the database
-        await instaDataInstance.save();
-*/
-        if (!postUrl) {
-            return res.status(400).json({ error: 'Invalid post URL.' });
-        }
 
         browser = await puppeteer.launch({ headless: 'new' });
         const page = await browser.newPage();
@@ -94,13 +74,11 @@ app.post('/download', async (req, res) => {
         // Navigate to the Instagram post URL
         await page.goto(postUrl);
         await page.waitForTimeout(5000);
-
         const videoTagContent = await page.evaluate(() => {
             const videoTag = document.querySelector('video');
             const imageTag = document.querySelector('img');
             return videoTag ? videoTag.src : (imageTag ? imageTag.outerHTML : 'No video or image tag found');
         });
-
         // Send the video or image tag content as the response
         res.status(200).json({ content: videoTagContent });
     } catch (error) {
@@ -112,7 +90,6 @@ app.post('/download', async (req, res) => {
         }
     }
 });
-
 app.listen(PORT, () => {
     console.log(`Server is running on ${PORT}`);
 });
