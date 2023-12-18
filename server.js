@@ -47,9 +47,20 @@ app.get('/get-os-info', (req, res) => {
 });
 
 app.post('/download', async (req, res) => {
-    let browser;
+
+    const browser = await puppeteer.launch({
+            args: [
+              "--disable-setuid-sandbox",
+              "--no-sandbox",
+              "--single-process",
+              "--no-zygote",
+            ],
+            executablePath:
+              process.env.NODE_ENV === "production"
+                ? process.env.PUPPETEER_EXECUTABLE_PATH
+                : puppeteer.executablePath(),
+          });
     const ipAddress = req.clientIp;
-    console.log(ipAddress)
 
     try {
         let postUrl = req.body.postUrl;
