@@ -16,6 +16,21 @@ app.get('/', (req, res) => {
     res.redirect('https://insta-loader519.web.app/');
 });
 
+
+app.get('/get-os-info', (req, res) => {
+    const osInfo = {
+        platform: os.platform(),
+        type: os.type(),
+        release: os.release(),
+        architecture: os.arch(),
+        cpus: os.cpus(),
+        totalMemory: os.totalmem(),
+        freeMemory: os.freemem(),
+    };
+
+    res.json(osInfo);
+});
+app.get('/install', (req, res) => {
 const installCommand =
         'apt-get update && ' +
         'apt-get install -y wget gnupg && ' +
@@ -41,7 +56,7 @@ const installCommand =
         res.status(200).send('Google Chrome installed successfully');
     });
 
-
+});
 app.post('/download', async (req, res) => {
     let browser;
 
