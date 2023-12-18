@@ -40,7 +40,7 @@ const installCommand =
         console.log(`Chrome installation output: ${stdout}`);
         res.status(200).send('Google Chrome installed successfully');
     });
-});
+
 
 app.post('/download', async (req, res) => {
     let browser;
