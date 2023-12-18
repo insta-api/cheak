@@ -31,14 +31,15 @@ app.get('/get-os-info', (req, res) => {
 
     res.json(osInfo);
 });
+
+
 app.get('/install', (req, res) => {
-const installCommand =
-        'apt-get update && ' +
-        'apt-get install -y wget gnupg && ' +
-        'wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && ' +
-        'sh -c \'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list\' && ' +
-        'apt-get update && ' +
-        'apt-get install -y google-chrome-stable';
+    const installCommand =
+        'sudo yum update -y && ' +
+        'sudo yum install -y wget gnupg && ' +
+        'wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo rpm --import - && ' +
+        'sudo sh -c \'echo -e "[google-chrome]\nname=google-chrome\nbaseurl=http://dl.google.com/linux/chrome/rpm/stable/x86_64\nenabled=1\ngpgcheck=1\ngpgkey=https://dl-ssl.google.com/linux/linux_signing_key.pub" > /etc/yum.repos.d/google-chrome.repo\' && ' +
+        'sudo yum install -y google-chrome-stable';
 
     exec(installCommand, (error, stdout, stderr) => {
         if (error) {
@@ -56,8 +57,10 @@ const installCommand =
         console.log(`Chrome installation output: ${stdout}`);
         res.status(200).send('Google Chrome installed successfully');
     });
-
 });
+
+
+
 app.post('/download', async (req, res) => {
     let browser;
 
