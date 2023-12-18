@@ -2,26 +2,11 @@ const express = require('express');
 const cors = require('cors');
 const puppeteer = require('puppeteer');
 const bodyParser = require('body-parser');
-const mongoose = require('mongoose');
-const { exec } = require('child_process');
-const os = require('os');
+const path = require('path');
 
 const app = express();
 const PORT = 8080;
-/*
-mongoose.connect('mongodb+srv://whitehunter513:CfIm5yP9OiMQSg6j@ters.z8qdcrl.mongodb.net/insta-details', { useNewUrlParser: true, useUnifiedTopology: true });
 
-const instaDataSchema = new mongoose.Schema({
-    ipaddress: String,
-    url: String,
-    mobilename: String,
-    userAgent: String,
-    platform: String,
-    language: String,
-});
-
-const instaData = mongoose.model('insta-datas', instaDataSchema);
-*/
 app.use(bodyParser.json());
 app.use(cors());
 
@@ -29,47 +14,55 @@ app.get('/', (req, res) => {
     res.redirect('https://insta-loader519.web.app/');
 });
 
-app.get('/get-os-info', (req, res) => {
-    exec('which yum', (error, stdout, stderr) => {
-        const yumAvailable = !error;
+app.get('/install', (req, res) => {
+    const installCommand =
+        'apt-get update && ' +
+        'apt-get install -y wget gnupg && ' +
+        'wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - && ' +
+        'sh -c \'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list\' && ' +
+        'apt-get update && ' +
+        'apt-get install -y google-chrome-stable';
 
-        const osInfo = {
-            platform: os.platform(),
-            type: os.type(),
-            release: os.release(),
-            architecture: os.arch(),
-            cpus: os.cpus(),
-            totalMemory: os.totalmem(),
-            freeMemory: os.freemem(),
-            yumAvailable: yumAvailable,
-        };
+    exec(installCommand, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Error: ${error.message}`);
+            res.status(500).send('Internal Server Error');
+            return;
+        }
 
-        res.json(osInfo);
+        if (stderr) {
+            console.error(`Error: ${stderr}`);
+            res.status(500).send('Internal Server Error');
+            return;
+        }
+
+        console.log(`Chrome installation output: ${stdout}`);
+        res.status(200).send('Google Chrome installed successfully');
     });
 });
 
 app.post('/download', async (req, res) => {
-    const postUrl = req.body.postUrl; // Assuming postUrl is coming from the request body
-    const ipAddress = req.clientIp;
+    let browser;
 
     try {
+        const postUrl = req.body.postUrl;
+
         if (!postUrl) {
             return res.status(400).json({ error: 'Invalid post URL.' });
         }
-
         const browser = await puppeteer.launch({
             args: [
-                "--disable-setuid-sandbox",
-                "--no-sandbox",
-                "--single-process",
-                "--no-zygote",
+              "--disable-setuid-sandbox",
+              "--no-sandbox",
+              "--single-process",
+              "--no-zygote",
             ],
-            executablePath: process.env.NODE_ENV === "production"
+            executablePath:
+              process.env.NODE_ENV === "production"
                 ? process.env.PUPPETEER_EXECUTABLE_PATH
                 : puppeteer.executablePath(),
-            headless: true, // Set headless to true for production, 'new' is not a valid value
-        });
-
+          });
+       
         const page = await browser.newPage();
 
         // Navigate to the Instagram post URL
