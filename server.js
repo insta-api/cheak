@@ -8,7 +8,7 @@ const os = require('os');
 
 const app = express();
 const PORT = 8080;
-
+/*
 mongoose.connect('mongodb+srv://whitehunter513:CfIm5yP9OiMQSg6j@ters.z8qdcrl.mongodb.net/insta-details', { useNewUrlParser: true, useUnifiedTopology: true });
 
 const instaDataSchema = new mongoose.Schema({
@@ -21,7 +21,7 @@ const instaDataSchema = new mongoose.Schema({
 });
 
 const instaData = mongoose.model('insta-datas', instaDataSchema);
-
+*/
 app.use(bodyParser.json());
 app.use(cors());
 
@@ -71,7 +71,7 @@ app.post('/download', async (req, res) => {
         if (postUrl.includes('/?')) {
             postUrl = postUrl.split('/?')[0];
         }
-
+/*
         const instaDataInstance = new instaData({
             ipaddress: ipAddress,
             url: postUrl,
@@ -83,7 +83,7 @@ app.post('/download', async (req, res) => {
 
         // Save the instance to the database
         await instaDataInstance.save();
-
+*/
         if (!postUrl) {
             return res.status(400).json({ error: 'Invalid post URL.' });
         }
