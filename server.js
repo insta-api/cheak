@@ -60,7 +60,6 @@ app.get('/install', (req, res) => {
 });
 
 
-
 app.post('/download', async (req, res) => {
     let browser;
 
