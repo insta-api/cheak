@@ -35,11 +35,11 @@ app.get('/get-os-info', (req, res) => {
 
 app.get('/install', (req, res) => {
     const installCommand =
-        'sudo yum update -y && ' +
-        'sudo yum install -y wget gnupg && ' +
-        'wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | sudo rpm --import - && ' +
-        'sudo sh -c \'echo -e "[google-chrome]\nname=google-chrome\nbaseurl=http://dl.google.com/linux/chrome/rpm/stable/x86_64\nenabled=1\ngpgcheck=1\ngpgkey=https://dl-ssl.google.com/linux/linux_signing_key.pub" > /etc/yum.repos.d/google-chrome.repo\' && ' +
-        'sudo yum install -y google-chrome-stable';
+        'yum update -y && ' +
+        'yum install -y wget gnupg && ' +
+        'wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | rpm --import - && ' +
+        'sh -c \'echo -e "[google-chrome]\nname=google-chrome\nbaseurl=http://dl.google.com/linux/chrome/rpm/stable/x86_64\nenabled=1\ngpgcheck=1\ngpgkey=https://dl-ssl.google.com/linux/linux_signing_key.pub" > /etc/yum.repos.d/google-chrome.repo\' && ' +
+        'yum install -y google-chrome-stable';
 
     exec(installCommand, (error, stdout, stderr) => {
         if (error) {
