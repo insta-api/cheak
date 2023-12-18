@@ -3,6 +3,8 @@ const cors = require('cors');
 const puppeteer = require('puppeteer');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const { exec } = require('child_process');
+const os = require('os');
 
 const app = express();
 const PORT = 8080;
@@ -47,7 +49,8 @@ app.get('/get-os-info', (req, res) => {
 });
 
 app.post('/download', async (req, res) => {
-
+    
+    const ipAddress = req.clientIp;
     const browser = await puppeteer.launch({
             args: [
               "--disable-setuid-sandbox",
@@ -60,8 +63,7 @@ app.post('/download', async (req, res) => {
                 ? process.env.PUPPETEER_EXECUTABLE_PATH
                 : puppeteer.executablePath(),
           });
-    const ipAddress = req.clientIp;
-
+   
     try {
         let postUrl = req.body.postUrl;
         let deviceDetail = req.body.device;
