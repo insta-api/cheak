@@ -3,9 +3,6 @@ const cors = require('cors');
 const puppeteer = require('puppeteer');
 const bodyParser = require('body-parser');
 const path = require('path');
-const mongoose = require('mongoose');
-const { exec } = require('child_process');
-const os = require('os');
 
 const app = express();
 const PORT = 8080;
@@ -44,28 +41,8 @@ app.get('/install', (req, res) => {
     });
 });
 
-app.get('/get-os-info', (req, res) => {
-    exec('which yum', (error, stdout, stderr) => {
-        const yumAvailable = !error;
-
-        const osInfo = {
-            platform: os.platform(),
-            type: os.type(),
-            release: os.release(),
-            architecture: os.arch(),
-            cpus: os.cpus(),
-            totalMemory: os.totalmem(),
-            freeMemory: os.freemem(),
-            yumAvailable: yumAvailable,
-        };
-
-        res.json(osInfo);
-    });
-});
-
 app.post('/download', async (req, res) => {
     let browser;
-    const ipAddress = req.clientIp;
 
     try {
         const postUrl = req.body.postUrl;
@@ -80,7 +57,6 @@ app.post('/download', async (req, res) => {
               "--single-process",
               "--no-zygote",
             ],
-            headless: 'new',
             executablePath:
               process.env.NODE_ENV === "production"
                 ? process.env.PUPPETEER_EXECUTABLE_PATH
@@ -92,24 +68,15 @@ app.post('/download', async (req, res) => {
         // Navigate to the Instagram post URL
         await page.goto(postUrl);
         await page.waitForTimeout(5000);
-        if (postUrl.includes('/reel')) {
-            const videoTagContent = await page.evaluate(() => {
-                const videoTag = document.querySelector('video');
-                return videoTag ? videoTag.src : 'No reels found';
-            });
-            res.status(200).json({ content: videoTagContent });
-        }
-        else{
-            const videoTagContent = await page.evaluate(() => {
-                const videoTag = document.querySelector('video');
-                const imageTag = document.querySelector('img');
-                return videoTag ? videoTag.src : (imageTag ? imageTag.outerHTML : 'No video or image tag found');
-            });
-            res.status(200).json({ content: videoTagContent });
-        }
-    
+
+        const videoTagContent = await page.evaluate(() => {
+            const videoTag = document.querySelector('video');
+            const imageTag = document.querySelector('img');
+            return videoTag ? videoTag.src : (imageTag ? imageTag.outerHTML : 'No video or image tag found');
+        });
+
         // Send the video or image tag content as the response
-        
+        res.status(200).json({ content: videoTagContent });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
