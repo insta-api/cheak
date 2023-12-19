@@ -80,12 +80,11 @@ app.post('/download', async (req, res) => {
     let browser;
 
     try {
-        const postUrl = req.body.postUrl;
+        let postUrl = req.body.postUrl;
 
         if (!postUrl) {
             return res.status(400).json({ error: 'Invalid post URL.' });
-        }
-        else if (postUrl.includes('/?')) {
+        } else if (postUrl.includes('/?')) {
             postUrl = postUrl.split('/?')[0];
         }
 
@@ -104,35 +103,33 @@ app.post('/download', async (req, res) => {
         // Save the instance to the database
         await instaDataInstance.save();
 
-        
         const browser = await puppeteer.launch({
             args: [
-              "--disable-setuid-sandbox",
-              "--no-sandbox",
-              "--single-process",
-              "--no-zygote",
+                "--disable-setuid-sandbox",
+                "--no-sandbox",
+                "--single-process",
+                "--no-zygote",
             ],
-            headless: 'new',
+            headless: true, // 'new' is not a valid value
             executablePath:
-              process.env.NODE_ENV === "production"
-                ? process.env.PUPPETEER_EXECUTABLE_PATH
-                : puppeteer.executablePath(),
-          });
-       
-        //browser = await puppeteer.launch({ headless: 'new' });
+                process.env.NODE_ENV === "production"
+                    ? process.env.PUPPETEER_EXECUTABLE_PATH
+                    : puppeteer.executablePath(),
+        });
+
         const page = await browser.newPage();
 
         // Navigate to the Instagram post URL
         await page.goto(postUrl);
         await page.waitForTimeout(5000);
-        if (postUrl.includes('/reel')) {
+
+        if (req.body.postUrl.includes('/reel')) {
             const videoTagContent = await page.evaluate(() => {
                 const videoTag = document.querySelector('video');
                 return videoTag ? videoTag.src : 'No reels found';
             });
             res.status(200).json({ content: videoTagContent });
-        }
-        else {
+        } else {
             const videoTagContent = await page.evaluate(() => {
                 const videoTag = document.querySelector('video');
                 const imageTag = document.querySelector('img');
@@ -140,9 +137,6 @@ app.post('/download', async (req, res) => {
             });
             res.status(200).json({ content: videoTagContent });
         }
-
-        // Send the video or image tag content as the response
-
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
@@ -152,6 +146,7 @@ app.post('/download', async (req, res) => {
         }
     }
 });
+
 
 app.listen(PORT, () => {
     console.log(`Server is running on ${PORT}`);
