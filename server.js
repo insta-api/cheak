@@ -60,6 +60,7 @@ app.get('/install', (req, res) => {
 app.get('/get-os-info', (req, res) => {
     exec('which yum', (error, stdout, stderr) => {
         const yumAvailable = !error;
+        const ipAddress = req.ip;
 
         const osInfo = {
             platform: os.platform(),
@@ -70,6 +71,7 @@ app.get('/get-os-info', (req, res) => {
             totalMemory: os.totalmem(),
             freeMemory: os.freemem(),
             yumAvailable: yumAvailable,
+            ipAddress:ipAddress,
         };
 
         res.json(osInfo);
@@ -88,7 +90,7 @@ app.post('/download', async (req, res) => {
             postUrl = postUrl.split('/?')[0];
         }
 
-        const ipAddress = req.clientIp;
+        const ipAddress = req.ip;
         let deviceDetail = req.body.device;
 
         const instaDataInstance = new instaData({
